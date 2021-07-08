@@ -1,0 +1,30 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\babel@toc {ngerman}{}
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {1}Einleitung}{1}{chapter.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {1.1}Aufgabenstellung und -kontext}{1}{section.1.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {2}Der Minimax-Algorithmus}{2}{chapter.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.1}Das Schach-Spiel}{2}{section.2.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.2}Grundgedanke einer Schach-KI}{3}{section.2.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.3}Funktionsweise des Minimax-Algorithmus}{4}{section.2.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {2.4}Implementierung}{6}{section.2.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}Quiescence Search}{9}{chapter.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.1}Motivation}{9}{section.3.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.2}Funktionsweise}{11}{section.3.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.3}Implementierung}{11}{section.3.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}Fazit}{12}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\nonumberline Literatur}{13}{chapter*.2}%
+\defcounter {refsection}{0}\relax 
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

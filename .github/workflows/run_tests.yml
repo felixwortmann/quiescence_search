@@ -22,5 +22,4 @@ jobs:
       - name: Run Tests
         run: runipy unit_tests.ipynb
       - name: Run Benchmark
-        timeout-minutes: 3600
         run: runipy benchmark.ipynb

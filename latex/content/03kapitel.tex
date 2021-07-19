@@ -22,7 +22,51 @@ Diese Beispiele verdeutlichen, dass, bei taktischen Zügen, eine tiefere Evaluat
 \section{Funktionsweise}
 Bevor die Quiescence konkret implementiert werden kann, muss geklärt werden, wie sie funktioniert und wann sie eingesetzt wird.
 
-In Abschnitt~\ref{section:motivation} wurden \textit{taktische Züge} erwähnt. Das \textit{Chess Programming Wiki} definiert den Begriff folgendermaßen: "`\textit{Tactical moves in the context of chess program move classification are moves which immediate change material balance and capture a piece or cause a promotion} […]"'\footcite{chessprogramming}. Es handelt sich also bei taktischen Züge um das Schlagen von Figuren respektive um das Aufwerten eines Bauern. 
+In Abschnitt~\ref{section:motivation} wurden \textit{taktische Züge} erwähnt. Das \textit{Chess Programming Wiki} definiert den Begriff folgendermaßen: "`\textit{Tactical moves in the context of chess program move classification are moves which immediate change material balance and capture a piece or cause a promotion} […]"'\footcite{chessprogramming}. Es handelt sich also bei taktischen Züge um das Schlagen von Figuren respektive um das Aufwerten eines Bauern. Die Erweiterung des Algorithmus muss also dann eine tiefere Suche durchführen, wenn ein solcher taktischer Zug der zuletzt analysierte war. 
+
+Die Position in der Implementierung, an der die Quiescence Search eingesetzt werden muss, lässt sich ebenfalls definieren: So muss die Funktion für die Quiescence Search dann aufgerufen werden, wenn das Programm an der Suchtiefe angekommen ist. Innerhalb der Funktion wird dann geprüft, ob der letzte Zug ein taktischer Zug war, um eventuell tiefer zu suchen. Die tiefere Suche wird lediglich durch einen erneuten Aufruf der Minimax-Funktion umgesetzt.
 
 \section{Implementierung}
-tbd
+Dieser Abschnitt zeigt die Implementierung der Quiescence Search. Außerdem wird erläutert, wie die korrekte Funktionsweise der Quiescence Search geprüft wurde.
+
+\begin{lstlisting}[caption=Erweiterung der Funktion des Minimax-Algorithmus für die Verwendung von Quiescence Search, label=lst:erweiterung]
+	@memoize_minimax
+	def minimax(board, depth, alpha, beta, is_quiesce):
+		# ...
+		if depth == 0 or not board.legal_moves:
+			value = static_eval(board, is_endgame(board))
+			if is_quiesce:
+				return value
+			return quiesce(board,alpha,beta,value)
+		# ...
+\end{lstlisting}
+
+Der Code-Ausschnitt~\ref{lst:erweiterung} zeigt den Teil der Minimax-Funktion, der für die Verwendung der Quiescence Search erweitert wurde. Zum einen wurde der Funktion der Parameter \texttt{is_quiesce} hinzugefügt (dieser wird bei der Erläuterung der Funktion \texttt{quiesce} genauer erklärt), zum anderen wurde der Aufruf der Funktion \texttt{quiesce} mit den Parametern \texttt{board}, \texttt{alpha}, \texttt{beta} und \texttt{value}. Der Parameter \texttt{board} stellt dabei den aktuellen Spiel-Zustand dar, die Werte \texttt{alpha} und \texttt{beta} sind die Schranken des Alpha-Beta-Prunings. Diese drei Werte werden schlicht übernommen, da die Minimax-Funktion ebenfalls mit diesen Parametern aufgerufen wird. Der letzte Parameter \texttt{value} hingegen ist der Rückgabewert der Evaluierungsfunktion \texttt{static_eval}.
+
+Bevor die eigentliche Quiescence-Search-Funktion \texttt{quiesce} vorgestellt wird, wird in dem Code-Ausschnitt~\ref{lst:pieces} die Hilfsfunktion \texttt{get_pieces_sum} gezeigt. Diese Funktion hat als Eingabeparameter \texttt{board}, den aktuellen Spielzustand, und berechnet lediglich die Figurenanzahl -- beziehungsweise die Werte, sodass also eine Dame den Rückgabewert stärker erhöht als ein Bauer -- der beiden Spieler. Diese Funktion ist notwendig, um zu überprüfen, ob ein Zug ein taktischer Zug war, also eine Veränderung der Figurenanzahl/-werte verursacht hat.
+
+\begin{lstlisting}[caption=Hilfsfunktion für die Differenzierung taktischer Züge, label=lst:pieces]
+	def get_pieces_sum(board):
+    	value = 0
+    	for piece_type in range(1,6):
+        	value += len(board.pieces(piece_type,chess.WHITE))
+        	value += len(board.pieces(piece_type,chess.BLACK))
+    	return value
+\end{lstlisting}
+
+Es existieren zudem zwei Konstanten, \texttt{ENABLE_QUIESCENCE_SEARCH} und \texttt{QUIESCE_DEPTH}. Bei der ersten Konstante handelt es sich um ein \textit{Flag}, um die Ruhesuche zu deaktivieren. Dies ist für den Test der Funktion notwendig, da überprüft wird, ob das Programm mit Quiescence Search einen besseren Zug spielt, als ohne. Die Konstante \texttt{QUIESCE_DEPTH steht standardmäßig auf $2$ und legt fest, wie tief das Programm in der Ruhesuche weiterhin sucht. Eine solche Begrenzung ist notwendig, da das Programm andernfalls womöglich sehr viele Ebenen tiefer rechnen würde, wenn in mehreren aufeinanderfolgenden Zügen eine Figur geschlagen oder aufgewertet werden kann. In einer ersten Implementation existierte diese Begrenzung nicht, was einen Rekursions-Fehler zur Folge hatte, da das Programm letztlich zu tief analysiert hatte.
+
+\begin{lstlisting}[caption=Funktion, welche die Ruhesuche implementiert, label=lst:quiesce]
+	def quiesce(board,alpha,beta,value):
+    	if not ENABLE_QUIESCENCE_SEARCH:
+			return value
+		pieces_after_move = get_pieces_sum(board)
+		move = board.pop()
+		pieces_before_move = get_pieces_sum(board)
+		board.push(move)
+		if(pieces_after_move != pieces_before_move):
+			value = minimax(board,QUIESCE_DEPTH,max(value,alpha),beta,True)
+		return value
+\end{lstlisting}
+
+Der Code-Ausschnitt~\ref{lst:quiesce} zeigt nun die komplette Funktion \texttt{quiesce}, welche die Ruhesuche implementiert. Hierfür wird zunächst der bereits evaluierte Wert \texttt{value} zurückgegeben, falls die Quiescence Search deaktiviert ist (erkennbar durch das Flag \texttt{ENABLE_QUIESCENCE_SEARCH}). Andernfalls wird zunächst die Summe der Figurenwerte aktuell -- also nach dem letzten evaluierten Zug --, danach die Summe der Figurenwerte vor jenem letzten Zug verglichen. Stimmen diese beiden Werte nicht überein, so besteht hier die beschrieben Notwendigkeit, die Quiescence Search anzuwenden

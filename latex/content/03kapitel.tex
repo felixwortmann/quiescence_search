@@ -41,9 +41,9 @@ Dieser Abschnitt zeigt die Implementierung der Quiescence Search. Außerdem wird
 		# ...
 \end{lstlisting}
 
-Der Code-Ausschnitt~\ref{lst:erweiterung} zeigt den Teil der Minimax-Funktion, der für die Verwendung der Quiescence Search erweitert wurde. Zum einen wurde der Funktion der Parameter \texttt{is_quiesce} hinzugefügt (dieser wird bei der Erläuterung der Funktion \texttt{quiesce} genauer erklärt), zum anderen wurde der Aufruf der Funktion \texttt{quiesce} mit den Parametern \texttt{board}, \texttt{alpha}, \texttt{beta} und \texttt{value}. Der Parameter \texttt{board} stellt dabei den aktuellen Spiel-Zustand dar, die Werte \texttt{alpha} und \texttt{beta} sind die Schranken des Alpha-Beta-Prunings. Diese drei Werte werden schlicht übernommen, da die Minimax-Funktion ebenfalls mit diesen Parametern aufgerufen wird. Der letzte Parameter \texttt{value} hingegen ist der Rückgabewert der Evaluierungsfunktion \texttt{static_eval}.
+Der Code-Ausschnitt~\ref{lst:erweiterung} zeigt den Teil der Minimax-Funktion, der für die Verwendung der Quiescence Search erweitert wurde. Zum einen wurde der Funktion der Parameter \texttt{is\_quiesce} hinzugefügt (dieser wird bei der Erläuterung der Funktion \texttt{quiesce} genauer erklärt), zum anderen wurde der Aufruf der Funktion \texttt{quiesce} mit den Parametern \texttt{board}, \texttt{alpha}, \texttt{beta} und \texttt{value}. Der Parameter \texttt{board} stellt dabei den aktuellen Spiel-Zustand dar, die Werte \texttt{alpha} und \texttt{beta} sind die Schranken des Alpha-Beta-Prunings. Diese drei Werte werden schlicht übernommen, da die Minimax-Funktion ebenfalls mit diesen Parametern aufgerufen wird. Der letzte Parameter \texttt{value} hingegen ist der Rückgabewert der Evaluierungsfunktion \texttt{static\_eval}.
 
-Bevor die eigentliche Quiescence-Search-Funktion \texttt{quiesce} vorgestellt wird, wird in dem Code-Ausschnitt~\ref{lst:pieces} die Hilfsfunktion \texttt{get_pieces_sum} gezeigt. Diese Funktion hat als Eingabeparameter \texttt{board}, den aktuellen Spielzustand, und berechnet lediglich die Figurenanzahl -- beziehungsweise die Werte, sodass also eine Dame den Rückgabewert stärker erhöht als ein Bauer -- der beiden Spieler. Diese Funktion ist notwendig, um zu überprüfen, ob ein Zug ein taktischer Zug war, also eine Veränderung der Figurenanzahl/-werte verursacht hat.
+Bevor die eigentliche Quiescence-Search-Funktion \texttt{quiesce} vorgestellt wird, wird in dem Code-Ausschnitt~\ref{lst:pieces} die Hilfsfunktion \texttt{get\_pieces\_sum} gezeigt. Diese Funktion hat als Eingabeparameter \texttt{board}, den aktuellen Spielzustand, und berechnet lediglich die Figurenanzahl -- beziehungsweise die Werte, sodass also eine Dame den Rückgabewert stärker erhöht als ein Bauer -- der beiden Spieler. Diese Funktion ist notwendig, um zu überprüfen, ob ein Zug ein taktischer Zug war, also eine Veränderung der Figurenanzahl/-werte verursacht hat.
 
 \begin{lstlisting}[caption=Hilfsfunktion für die Differenzierung taktischer Züge, label=lst:pieces]
 	def get_pieces_sum(board):
@@ -54,9 +54,9 @@ Bevor die eigentliche Quiescence-Search-Funktion \texttt{quiesce} vorgestellt wi
     	return value
 \end{lstlisting}
 
-Es existieren zudem zwei Konstanten, \texttt{ENABLE_QUIESCENCE_SEARCH} und \texttt{QUIESCE_DEPTH}. Bei der ersten Konstante handelt es sich um ein \textit{Flag}, um die Ruhesuche zu deaktivieren. Dies ist für den Test der Funktion notwendig, da überprüft wird, ob das Programm mit Quiescence Search einen besseren Zug spielt, als ohne. Die Konstante \texttt{QUIESCE_DEPTH steht standardmäßig auf $2$ und legt fest, wie tief das Programm in der Ruhesuche weiterhin sucht. Eine solche Begrenzung ist notwendig, da das Programm andernfalls womöglich sehr viele Ebenen tiefer rechnen würde, wenn in mehreren aufeinanderfolgenden Zügen eine Figur geschlagen oder aufgewertet werden kann. In einer ersten Implementation existierte diese Begrenzung nicht, was einen Rekursions-Fehler zur Folge hatte, da das Programm letztlich zu tief analysiert hatte.
+Es existieren zudem zwei Konstanten, \texttt{ENABLE\_QUIESCENCE\_SEARCH} und \texttt{QUIESCE\_DEPTH}. Bei der ersten Konstante handelt es sich um ein \textit{Flag}, um die Ruhesuche zu deaktivieren. Dies ist für den Test der Funktion notwendig, da überprüft wird, ob das Programm mit Quiescence Search einen besseren Zug spielt, als ohne. Die Konstante \texttt{QUIESCE\_DEPTH} steht standardmäßig auf $2$ und legt fest, wie tief das Programm in der Ruhesuche weiterhin sucht. Eine solche Begrenzung ist notwendig, da das Programm andernfalls womöglich sehr viele Ebenen tiefer rechnen würde, wenn in mehreren aufeinanderfolgenden Zügen eine Figur geschlagen oder aufgewertet werden kann. In einer ersten Implementierung existierte diese Begrenzung nicht, was einen Rekursions-Fehler zur Folge hatte, da das Programm letztlich zu tief analysiert hatte.
 
-\begin{lstlisting}[caption=Funktion, welche die Ruhesuche implementiert, label=lst:quiesce]
+\begin{lstlisting}[caption=Funktion für die Implementierung der Ruhesuche, label=lst:quiesce]
 	def quiesce(board,alpha,beta,value):
     	if not ENABLE_QUIESCENCE_SEARCH:
 			return value
@@ -69,4 +69,61 @@ Es existieren zudem zwei Konstanten, \texttt{ENABLE_QUIESCENCE_SEARCH} und \text
 		return value
 \end{lstlisting}
 
-Der Code-Ausschnitt~\ref{lst:quiesce} zeigt nun die komplette Funktion \texttt{quiesce}, welche die Ruhesuche implementiert. Hierfür wird zunächst der bereits evaluierte Wert \texttt{value} zurückgegeben, falls die Quiescence Search deaktiviert ist (erkennbar durch das Flag \texttt{ENABLE_QUIESCENCE_SEARCH}). Andernfalls wird zunächst die Summe der Figurenwerte aktuell -- also nach dem letzten evaluierten Zug --, danach die Summe der Figurenwerte vor jenem letzten Zug verglichen. Stimmen diese beiden Werte nicht überein, so besteht hier die beschrieben Notwendigkeit, die Quiescence Search anzuwenden
+Der Code-Ausschnitt~\ref{lst:quiesce} zeigt nun die komplette Funktion \texttt{quiesce}, welche die Ruhesuche implementiert. Hierfür wird zunächst der bereits evaluierte Wert \texttt{value} zurückgegeben, falls die Quiescence Search deaktiviert ist (erkennbar durch das Flag \texttt{ENABLE\_QUIESCENCE\_SEARCH}). Andernfalls wird zunächst die Summe der Figurenwerte aktuell -- also nach dem letzten evaluierten Zug --, danach die Summe der Figurenwerte vor jenem letzten Zug verglichen. Stimmen diese beiden Werte nicht überein, so besteht hier die beschrieben Notwendigkeit, die Quiescence Search anzuwenden. In diesem Fall wird die Minimax-Funktion mit den folgenden Parametern aufgerufen:
+
+\begin{itemize}
+	\item \texttt{board}: Hier wird der aktuelle Spielzustand \texttt{board} übernommen, der der Funktion \texttt{quiesce} übergeben wurde. Der Spielzustand ist nicht verändert, da der \texttt{move}, welcher zuerst rückgängig gemacht wurde (um die Anzahl/Werte der Figuren zu erfassen), wieder "`gespielt'" wurde
+	\item \texttt{depth}: Hier wird die Konstante \texttt{QUIESCE\_DEPTH}, welche oben erwähnt wurde, übergeben. Es wird somit festgelegt, wie weit die Ruhesuche tiefer sucht, falls ein taktischer Zug der letzte analysierte Zug war
+	\item \texttt{alpha}: Hier wird der größere Wert von \texttt{value} und \texttt{alpha} übergeben
+	\item \texttt{beta}: Hier wird lediglich der Wert der Variable \texttt{beta} übernommen, welcher bei Aufruf der Funktion übergeben wurde
+	\item \texttt{is\_quiesce}: Hier wird der Wert \texttt{True} übergeben. Dadurch wird erreicht, dass, bei der Suchtiefe $0$, nicht erneut die Quiescence-Search-Funktion aufgerufen wird. In einer ersten Implementierung führte dies zu einem Rekursionsfehler
+\end{itemize}
+
+\section{Testen der Programm-Erweiterung}
+Um zu überprüfen, ob die Erweiterung, welche die Quiescence Search implementiert, wie erwartet funktioniert, wurde ein weiterer Test geschrieben. Zu diesem Zweck wurde das Szenario aus Abbildung~\ref{fig:problem} übernommen: Das Programm wurde zunächst normal aufgerufen, sodass die Erweiterung für die Quiescence Search in Kraft tritt. Aus Gründen der Einfachheit, wird die Minimax-Funktion mit einer Tiefe von $1$ aufgerufen. Der Code-Ausschnitt~\ref{lst:testone} zeigt dies.
+
+\begin{lstlisting}[caption=Test für die Quiescence Search (normaler Aufruf), label=lst:testone]
+	%%time
+	CACHE = {} # Has to be cleared for this test to work
+	board,move = perform_move(chess.Board("b3k3/1n5p/6p1/8/8/8/7P/1Q4K1 w - - 0 1"),1, True)
+	assert str(move) != "b1b7"
+\end{lstlisting}
+
+Der Cache -- welcher für die \textit{Memoization} verwendet wird -- muss geleert werden, da das Ergebenis sonst verfälscht werden könnte. Außerdem wird die Funktion \texttt{perform\_move} verwendet, welche jedoch lediglich das mehrfache Schreiben gleicher Anweisungen verhindert. Anschließend wird geprüft, ob es sich bei dem errechneten Zug \textbf{nicht} um den Zug \textit{b1b7}, also die Dame auf B7, wo sie im nächsten Zug geschlagen werden kann, handelt. Abbildung~\ref{fig:testone} zeigt, dass dies der Fall ist und die Ruhesuchenerweiterung somit eingreift und auch den taktischen Zug erkannt hat.
+
+\begin{figure}[H]
+	\includegraphics[width=.90\textwidth]{testone.png}
+	\caption{Korrekte Anwendung der Quiescence Search: Der scheinbar gute Zug wird nicht gewählt, obwohl die Minimax-Tiefe auf $1$ gesetzt ist}
+	\label{fig:testone}
+\end{figure}
+
+Zur Kontrolle des Tests wird der Test erneut aufgerufen, jedoch wird bei dem zweiten Mal das Flag \texttt{ENABLE\_QUIESCENCE\_SEARCH} auf \texttt{False} gesetzt, sodass die Erweiterung der Ruhesuche nicht verwendet wird (Der Code-Ausschnitt~\ref{lst:erweiterung} zeigt dies). Der Code-Ausschnitt~\ref{lst:testtwo} zeigt der Vollständigkeit halber auch den Code für diesen zweiten Test.
+
+\begin{lstlisting}[caption=Test für die Quiescence Search (Aufruf mit deaktivierter Ruhesuche), label=lst:testtwo]
+	%%time
+	ENABLE_QUIESCENCE_SEARCH = False
+	CACHE = {} # Has to be cleared for this test to work
+	board,move = perform_move(chess.Board("b3k3/1n5p/6p1/8/8/8/7P/1Q4K1 w - - 0 1"),1, True)
+	assert str(move) == "b1b7"
+	ENABLE_QUIESCENCE_SEARCH = True
+\end{lstlisting}
+
+Es ist zu sehen, dass der Test nahezu gleich ist, jedoch einen anderen errechneten Zug erwarten, nämlich den scheinbar guten Zug \textit{b1b7}. Abbildung~\ref{fig:testtwo} zeigt, dass das Ergebnis dieses Tests auch das eben erwartete ist: Das Programm denkt, aufgrund der Suchtiefe, dass es den besten Zug gefunden hat; der Horizonteffekt tritt ein.
+
+\begin{figure}[H]
+	\includegraphics[width=.90\textwidth]{testtwo.png}
+	\caption{Kontrolltest: Ohne Quiescence Search wählt das Programm einen schlechten Zug, welchen es allerdings aufgrund des Horizonteffekts nicht als solchen erkennt}
+	\label{fig:testtwo}
+\end{figure}
+
+\section{Performanz-Analyse}
+Letztlich gilt es zu untersuchen, inwiefern die Verbesserung der Zugberechnung Auswirkungen auf die Performanz und Berechnungsdauer des Programms hat. Hierfür wurden zwei Ansätze -- bei beiden Ansätzen wird das Programm einmal ohne Quiescence Search und einmal mit Quiescence Search aufgerufen -- analysiert:
+
+\begin{enumerate}
+	\item gleiche Tiefe bei beiden Aufrufen
+	\item Tiefe beim Aufruf mit Quiescence Search ist um $1$ verringert, dafür hat die erweiterte Suche eine Tiefe von $1$
+\end{enumerate}
+
+Bei der zweiten Variante handelt es sich also de facto um keine tiefere Suche als bei dem Vergleichswert ohne Quiescence Search; stattdessen wird generell weniger tief gesucht und nur bei taktischen Zügen eine tiefere Suche vorgenommen. Wenn ein starker Fokus auf die Berechnungsdauer des Programms gelegt wird, wäre die zweite Variante als Ansatz denkbar.
+
+HIER DANN ERGEBNISSE EINFÜGEN

@@ -2351,8 +2351,7 @@
     <bcf:citekey order="4">minimax</bcf:citekey>
     <bcf:citekey order="5">pruning</bcf:citekey>
     <bcf:citekey order="6">oxford</bcf:citekey>
-    <bcf:citekey order="7">nextchessmove</bcf:citekey>
-    <bcf:citekey order="8">chessprogramming</bcf:citekey>
+    <bcf:citekey order="7">chessprogramming</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

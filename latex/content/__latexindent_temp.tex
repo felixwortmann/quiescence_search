@@ -1,107 +1,144 @@
 %!TEX root = ../dokumentation.tex
 
-\chapter{Der Minimax-Algorithmus}
-In diesem Kapitel wird erläutert, wie die bestehende Implementierung der Schach-KI aufgebaut ist und wie diese funktioniert. Die vorgestellten Implementierungen können ebenfalls auf \textit{GitHub} unter \url{https://github.com/felixwortmann/chess} abgerufen werden.
+\chapter{Quiescence Search}\label{ch:quiescence}
+Dieses Kapitel beschäftigt sich mit der konkreten Zielsetzung dieser Arbeit: Eine Ergänzung der Schach-KI, sodass die Quiescence Search implementiert ist und das Programm somit effektivere Züge berechnen kann. 
 
-\section{Das Schach-Spiel}
-Zunächst werden die Grundlagen des Schach-Spiels erläutert. Es handelt sich bei Schach um ein Brettspiel für zwei Spieler, wobei einer der Spieler mit der Farbe Weiß, der andere mit der Farbe Schwarz spielt. Jeder der Spieler hat jeweils 16 Figuren, davon acht Bauern, jeweils zwei Springer, Läufer und Türme, eine Dame sowie einen König. Der Spieler der weißen Farbe beginnt stets, wobei jeder Spieler die folgenden Züge mit den jeweiligen Figuren ausführen kann:
+\section{Motivation}\label{section:motivation}
+Zunächst gilt zu klären, welche Motivation beziehungsweise welche Problemstellung der Notwendigkeit der Quiescence Search zugrunde liegt. Die Bezeichnung für das Problem, welches bei der vorhandenen Implementierung des Algorithmus auftritt, lautet \textit{Horizonteffekt}. Aufgrund der Tatsache, dass der Algorithmus mit einer festen Tiefe arbeitet, existiert für das Programm ein metaphorischer Horizont, über welchen es nicht hinausschauen kann. \textit{Oxford Reference} definiert den Begriff "`Horizonteffekt"' folgendermaßen: "`\textit{The horizon effect refers to the fact that interesting results will always exist beyond any depth D and therefore in any given search will not be discovered} […]"'\footcite{oxford}.
 
-\begin{itemize}
-    \item Bauer -- Die schwächste Figur im Spiel, kann pro Zug ein Feld nach vorne rücken (falls es der erste Zug des Bauern ist, kann dieser ein oder zwei Felder vorrücken) und gegnerische Figuren schlagen, falls sie diagonal ein Feld vor ihm liegen
-    \item Springer -- Die einzige Figur im Spiel, die über andere Figuren "`springen'" kann. Das Zugmuster des Springers gleicht einem L, da er zwei Felder in eine Richtung, dann ein Feld orthogonal zur Seite ziehen kann. Die Figuren, die er überspringt, werden nicht beeinflusst
-    \item Läufer -- Der Läufer kann sich auf einer Diagonale in alle Richtungen bewegen
-    \item Turm -- Türme können sich ähnlich den Läufern auf einer Linie bewegen, jedoch nicht diagonal sondern horizontal und vertikal
-    \item Dame -- Die Dame hat die meisten Möglichkeite zum Zug: diagonal, horizontal, vertikal sowie alle umliegenden Felder
-    \item König -- Der König kann sich zwar nur pro Zug ein Feld in eine beliebige Richtung bewegen, ist aber insofern die wichtigste Figur des Spiels, als dass er über Niederlage eines Spieler unterscheiden kann: Steht eine gegnerische Figur so, dass sie im nächsten Zug den König schlagen könnte, ist er \textit{schach} gesetzt; hat der Spieler zusätzlich keine Mögichkeit, den König zu schützen (durch Zug des Königs auf ein anderes Feld, Blockieren der Angriffslinie durch eine andere Figur oder schlagen der bedrohenden Figur), spricht man von \textit{Schachmatt} und der gegnerische Spieler hat gewonnen
-\end{itemize}
-
-Eine Möglichkeit, wie das Spiel enden kann, wurde bereits erwähnt: das \textit{Schachmatt}. Bei Schach handelt es sich um ein sogenanntes \textit{Nullsummenspiel}, sodass, analog zu Spielen wie beispielsweise \textit{Tic Tac Toe} oder \textit{Vier gewinnt}, das Spiel nur auf drei Weisen enden kann: Spieler A (weiß) gewinnt, Spieler B (schwarz) gewinnt oder es herrscht Gleichstand, \textit{Remis} genannt.
-
-Die drei Möglichen stellen sich folgendermaßen dar:
-
-\begin{enumerate}
-    \item Weiß gewinnt: Schwarz wurde schachmatt gesetzt oder hat aufgegeben
-    \item Schwarz gewinnt: Weiß wurde schachmatt gesetzt oder hat aufgegeben
-    \item Remis: Spieler einigen sich auf ein Remis, einer der Spieler steht \textit{patt} (keine möglichen Züge, der König ist jedoch nicht schachmatt gesetzt), beide Spieler haben nicht genug Figuren, um das Spiel zu gewinnen oder, die letzte Variante, eine bestimmte Anzahl an Zügen wurde (wiederholt) ausgeführt
-\end{enumerate}
-
-\section{Grundgedanke einer Schach-KI}
-Der grundlegende Ansatz einer Schach-KI besteht darin, dass das Programm alle möglichen Züge analysiert und den besten Zug auswählt. Aufgrund der oben erwähnten Anzahl an möglichen Zügen für jeden Spieler, wächst die Zahl der möglichen Spiele, die daraus resultieren, jedoch stark an. Es wäre daher de facto unmöglich, \textit{alle} Züge einer kompletten Schach-Partie zu analysieren, da kein Computer der Welt je genug Speicherplatz haben würde, um alle möglichen Ergebnisse abzuspeichern: Die Anwendung der Rechnung von \textit{Claude Shannon} ergibt eine geschätzte Untergrenze von $10^{120}$ möglichen Spielpositionen in einer gesamten Schachpartie\footcite{shannon}; die Anzahl der Atome im beobachtbaren Universum beträgt jedoch schätzungsweise $10^{80}$\footcite{merz}. Somit wird es, unabhängig von der Rechenleistung, nie möglich sein, alle unterschiedlichen Spiel-Ausgänge abzuspeichern.
-
-Entscheidet man sich nun, statt aller möglichen Züge, nur bis zu einer bestimmten Tiefe zu suchen, verringert sich die Anzahl an möglichen Zügen zwar, bleibt aber dennoch zu hoch, da sich die Anzahl an möglichen Spiel-Zuständen mit jedem vollen Zug um den Faktor $10^{3}$ erhöht\footcite{shannon}. Es benötigt also einen Algorithmus, welcher effizient durch eine begrenzte Anzahl möglicher Züge geht und analysiert, welcher dieser Züge die beste Folgeposition zur Folge hat. Der genutzte Algorithmus ist der \textit{Minimax-Algorithmus}, genauer die Variante \textit{Negamax}, welche jedoch de facto analog zu dem Standard-Minimax-Algorithmus funktioniert und lediglich die Rückgabewerte so anpasst, dass beide Spieler maximierend sind, statt der Standadvariante in der der Spieler der Farbe Weiß maximierend und der Spieler der Farbe Schwarz minimierend ist -- dies ist auch der Grund für die Namensgebung des Algorithmus.
-
-\section{Funktionsweise des Minimax-Algorithmus}
-Der Minimax-Algorithmus funktioniert \textit{rekursiv}, das heißt, dass die Funktion sich selbst so lange aufruft, bis die Abbruchbedingung erreicht wird. Die Abbruchbedingungen in diesem Kontext sind, dass entweder 
-
-\begin{enumerate}
-    \item die maximale Suchtiefe erreicht wird oder
-    \item keine weiteren Züge zur Analyse vorhanden sind.
-\end{enumerate}
-
-Abbildung~\ref{fig:minimax} stellt den Ablauf des Algorithmus dar. Zu sehen ist ein \textit{Baum}, welcher die verschiedenen Zustände durch Zahlen abbildet. Diese Zahlen können sowohl negativ als auch positiv sein; die negativen Zahlen sind dabei gut für den minimierenden Spieler (Schwarz), während positive Zahlen gut für den maximierenden Spieler (Weiß) sind. Außerdem sind die Werte $+\infty$ und $-\infty$ zu sehen -- diese Werte stellen eine Schachmatt-Position dar, können jedoch auch anders implementiert werden. Der Algorithmus geht so vor, dass er rekursiv durch den abgebildeten Baum iteriert und den Pfad raussucht, welcher zum besten Ergebnis (in der Abbildung wäre dies der Pfad, der zu $+\infty$ führt) führt.
+Abbildung~\ref{fig:problem} zeigt eine beispielhafte Aufstellung der Figuren auf einem Schachbrett. Aufgabe der KI ist es nun, den bestmöglichen Zug zu finden\footnote{Um das Beispiel möglichst einfach zu halten, wird angenommen, dass die KI mit einer Tiefe von $1$ rechnet. Für die Erklärung der Problemstellung macht dies jedoch keinen Unterschied, da sich das Beispiel übertragen lässt}.  Das Programm wird schnell erkennen, dass die Dame auf B2 den Springer auf B7 schlagen kann. Da der Horizont an dieser Stelle "`endet"', schätzt das Programm eben diesen Zug als den besten ein und gibt ihn zurück. Wäre die Suchtiefe jedoch um eine Ebene tiefer gewesen, hätte das Programm diesen Zug ausgeschlossen, da, nachdem die Dame den Springer geschlagen hat, der Läufer auf A8 die Dame direkt schlagen kann. Da eine Dame jedoch deutlich mehr wert ist als ein Springer -- in der vorhandenen Implementierung ist eine Dame 9 Bauern wert, ein Springer jedoch nur 3,2 Bauern -- handelt es sich um einen sehr schlechten Zug.
 
 \begin{figure}[H]
-	\includegraphics[width=.90\textwidth]{minimax.svg.png}
-	\caption{Überblick über die Vorgehensweise des Minimax-Algorithmus\footnotemark}
-	\label{fig:minimax}
+	\includegraphics[width=.90\textwidth]{problem.png}
+	\caption{Beispiel-Zustand für ein Schachbrett: Weiß kann im nächsten Zug einen Springer schlagen\footnotemark}
+	\label{fig:problem}
 \end{figure}
-\footnotetext{\cite{minimax}}
+\footnotetext{\cite{nextchessmove}}
 
-Die Werte werden mithilfe einer weiteren Funktion berechnet, indem verschiedene Faktoren in die Berechnung miteinbezogen werden. Beispiele für solche Faktoren sind:
+Ein weiteres Beispiel für den Horizonteffekt ist die scheinbare Vermeidung von schlechten Positionen: Das Programm erkennt eine schlechte Position, beispielsweise den Verlust einer Dame. Nun errechnet die KI einen Pfad, in dem diese Dame scheinbar nicht verloren wird; in der Realität hat das Programm den Verlust jedoch nur "`über"' den Horizont geschoben, sodass der Verlust der Dame unausweichlich ist -- zusätzlich hat das Verschieben des Problems womöglich eine insgesamt schlechtere Position hervorgerufen, als wenn die Dame direkt geopfert worden wäre.
 
-\begin{itemize}
-    \item Die Anzahl der jeweiligen Figuren, die verschiedenen Figurtypen haben dabei verschiedene Werte: Eine Dame entspricht dabei beispielsweise dem Wert von neun Bauern.
-    \item Die Position der einzelnen Figuren. Ein Springer im Zentrum ist wertvoller als ein Springer am Rand, da er im Zentrum mehr Zugmöglichkeiten hat.
-    \item Die Tatsache, ob ein Schachmatt herrscht.
-\end{itemize}
+Diese Beispiele verdeutlichen, dass, bei taktischen Zügen, eine tiefere Evaluation nicht nur sinnvoll sondern auch notwendig ist, um die Effektivität der Schach-KI zu steigern. Wird bei der tieferen Evaluation festgestellt, dass der Zug keine schlechtere Position hinter dem Horizont hervorruft, spricht man von einer \textit{ruhigen} Stellung, was auch die Bezeichnung der \textit{Ruhesuche} erklärt.
 
-Die Verwendung des Minimax-Algorithmus allein wird zwar eine intelligente Berechnung der Züge erlauben, jedoch, aufgrund der weiterhin großen Anzahl an möglichen Zügen, keine hohe Suchtiefe ermöglichen. Um die Berechnungsdauer zu verringern -- und somit eine hohere Suchtiefe zu ermöglichen -- bestehen daher Verbesserungsmöglichkeiten. Die implementierten Verbesserungen sind dabei das sogenannte \textit{Alpha-Beta-Pruning}, die Verwendung einer \textit{Transpositionstabelle} (auch als \textit{Memoization} oder \textit{Caching} bezeichnet) sowie die Verwendung einer \textit{Eröffnungsbibliothek}, welche erlaubt, zu Beginn der Partie jene Züge, die häufig bei Eröffnungen gespielt werden, direkt kontern zu können, ohne den Algorithmus zu benutzen.
+\section{Funktionsweise}
+Bevor die Quiescence konkret implementiert werden kann, muss geklärt werden, wie sie funktioniert und wann sie eingesetzt wird.
 
-Die Verwendung einer Transpositionstabelle bedeutet schlicht, dass bereits berechnete Züge in einem Cache gespeichert werden. Trifft der Algorithmus so zu einem späteren Zeitpunkt auf eine Position, die bereits ausgerechnet wurde, kann der Wert aus dem Cache geladen werden, um eine unnötige erneute Berechnung zu verhindern. Wird ein solches Caching genutzt, bietet sich das erwähnte Alpha-Beta-Pruning an. Abbildung~\ref{fig:pruning} stellt den groben Ablauf bei der Verwendung von Alpha-Beta-Pruning dar.
+In Abschnitt~\ref{section:motivation} wurden \textit{taktische Züge} erwähnt. Das \textit{Chess Programming Wiki} definiert den Begriff folgendermaßen: "`\textit{Tactical moves in the context of chess program move classification are moves which immediate change material balance and capture a piece or cause a promotion} […]"'\footcite{chessprogramming}. Es handelt sich also bei taktischen Züge um das Schlagen von Figuren respektive um das Aufwerten eines Bauern. Die Erweiterung des Algorithmus muss also dann eine tiefere Suche durchführen, wenn ein solcher taktischer Zug der zuletzt analysierte war. 
 
-\begin{figure}[H]
-	\includegraphics[width=.90\textwidth]{pruning.svg.png}
-	\caption{Überblick über die Vorgehensweise des Alpha-Beta-Prunings\footnotemark}
-	\label{fig:pruning}
-\end{figure}
-\footnotetext{\cite{pruning}}
-
-Genauer erklärt, werden für diese Erweiterung des Algorithmus zwei weitere Werte verwendet: $Alpha$ und $Beta$. Diese beiden Werte stellen zwei Grenzen dar, welche als Worst-Case-Szenarios gesehen werden können. Der Wert $Alpha$ stellt die untere Grenze und somit das Worst-Case-Szenario für die KI dar, während $Beta$ die obere Grenze und somit das Worst-Case-Szenario für den menschlichen Spieler abbildet. Der Algorithmus läuft so ab, dass mithilfe der Schranken die Werte der Zustands-Evaluation überprüft werden; überschreitet ein Wert die $Beta$-Grenze, so wird der gesamte Teilbaum von diesem Knoten ausgehend "`abgeschnitten'" -- ergo nicht weiter betrachtet -- da die gegnerische Seite (der menschliche Spieler) diesen Teilbaum nicht betreten wird, weil die bisher evaluierten Teilbäume bereits bessere Ergebnisse für den Spielern liefern. Die $Alpha$-Grenze wird so verwendet, dass die Werte der Zustands-Evaluation nur dann übernommen -- und somit als neuer $Alpha$-Wert gesetzt werden -- werden, falls sie die die bestehende $Alpha$-Grenze nicht unterschreiten, da in diesem Fall der betrachtete Zug schlechter als der aktuell beste Zug wäre.
+Die Position in der Implementierung, an der die Quiescence Search eingesetzt werden muss, lässt sich ebenfalls definieren: So muss die Funktion für die Quiescence Search dann aufgerufen werden, wenn das Programm an der Suchtiefe angekommen ist. Innerhalb der Funktion wird dann geprüft, ob der letzte Zug ein taktischer Zug war, um eventuell tiefer zu suchen. Die tiefere Suche wird lediglich durch einen erneuten Aufruf der Minimax-Funktion umgesetzt.
 
 \section{Implementierung}
-In diesem Abschnitt wird demonstriert, wie der oben erwähnte Algorithmus praktisch umgesetzt wurde. Es wird nicht der vollständige Code gezeigt, sondern nur die für den Algorithmus relevanten Teile, da sich diese Arbeit weniger auf den bereits vorhandenen Minimax-Algorithmus fokussiert, sondern mehr auf die Implementierung der Quiescence Search. In Kapitel~\ref{ch:quiescence} hingegen wird der gesamte Code gezeigt, der im Rahmen der Implementierung geschrieben wurde. Es sei an dieser Stelle nichtsdestotrotz erneut auf \url{https://github.com/felixwortmann/chess} verwiesen, wo der gesamte Quellcode für den Minimax-Algorithmus sowie diverse Hilfs- und Testfunktionen abrufbar ist.
+Dieser Abschnitt zeigt die Implementierung der Quiescence Search. Außerdem wird erläutert, wie die korrekte Funktionsweise der Quiescence Search geprüft wurde.
 
-\begin{lstlisting}[caption=Code-Beispiel, label=Bsp.1]
-    @memoize_minimax
-def minimax(board, depth, alpha, beta):
-    global BEST_MOVE
-    global MINIMAX_CALLS
-    MINIMAX_CALLS += 1
-    # Check, if current board is in cache
-    # If the depth is zero, give the static evaluation of the current board and save it in the cache
-    if depth == 0 or not board.legal_moves:
-        value = static_eval(board, is_endgame(board))
-        return value
-    max_value = alpha
-    ordered_moves = []
-    cnt = 0
-    # Order the moves roughly, using a static evaluation for every move
-    for move in board.legal_moves:
-        cnt += 1
-        board.push(move)
-        v = static_eval(board, is_endgame(board))
-        board.pop()
-        heapq.heappush(ordered_moves, (v, cnt, move))
-    # Calculate the minimax value recursively, using alpha-beta-pruning
-    for _, _, move in ordered_moves:
-        board.push(move)
-        value = -minimax(board, depth - 1, -beta, -max_value)
-        board.pop()
-        if value > max_value:
-            max_value = value
-            if depth == ANALYZING_DEPTH:
-                BEST_MOVE = move
-            if max_value >= beta:
-                break
-    return max_value
+\begin{lstlisting}[caption=Erweiterung der Funktion des Minimax-Algorithmus für die Verwendung von Quiescence Search, label=lst:erweiterung]
+	@memoize_minimax
+	def minimax(board, depth, alpha, beta, is_quiesce):
+		# ...
+		if depth == 0 or not board.legal_moves:
+			value = static_eval(board, is_endgame(board))
+			if is_quiesce:
+				return value
+			return quiesce(board,alpha,beta,value)
+		# ...
 \end{lstlisting}
+
+Der Code-Ausschnitt~\ref{lst:erweiterung} zeigt den Teil der Minimax-Funktion, der für die Verwendung der Quiescence Search erweitert wurde. Zum einen wurde der Funktion der Parameter \texttt{is\_quiesce} hinzugefügt (dieser wird bei der Erläuterung der Funktion \texttt{quiesce} genauer erklärt), zum anderen wurde der Aufruf der Funktion \texttt{quiesce} mit den Parametern \texttt{board}, \texttt{alpha}, \texttt{beta} und \texttt{value}. Der Parameter \texttt{board} stellt dabei den aktuellen Spiel-Zustand dar, die Werte \texttt{alpha} und \texttt{beta} sind die Schranken des Alpha-Beta-Prunings. Diese drei Werte werden schlicht übernommen, da die Minimax-Funktion ebenfalls mit diesen Parametern aufgerufen wird. Der letzte Parameter \texttt{value} hingegen ist der Rückgabewert der Evaluierungsfunktion \texttt{static\_eval}.
+
+Bevor die eigentliche Quiescence-Search-Funktion \texttt{quiesce} vorgestellt wird, wird in dem Code-Ausschnitt~\ref{lst:pieces} die Hilfsfunktion \texttt{get\_pieces\_sum} gezeigt. Diese Funktion hat als Eingabeparameter \texttt{board}, den aktuellen Spielzustand, und berechnet lediglich die Figurenanzahl -- beziehungsweise die Werte, sodass also eine Dame den Rückgabewert stärker erhöht als ein Bauer -- der beiden Spieler. Diese Funktion ist notwendig, um zu überprüfen, ob ein Zug ein taktischer Zug war, also eine Veränderung der Figurenanzahl/-werte verursacht hat.
+
+\begin{lstlisting}[caption=Hilfsfunktion für die Differenzierung taktischer Züge, label=lst:pieces]
+	def get_pieces_sum(board):
+    	value = 0
+    	for piece_type in range(1,6):
+        	value += len(board.pieces(piece_type,chess.WHITE))
+        	value += len(board.pieces(piece_type,chess.BLACK))
+    	return value
+\end{lstlisting}
+
+Es existieren zudem zwei Konstanten, \texttt{ENABLE\_QUIESCENCE\_SEARCH} und \texttt{QUIESCE\_DEPTH}. Bei der ersten Konstante handelt es sich um ein \textit{Flag}, um die Ruhesuche zu deaktivieren. Dies ist für den Test der Funktion notwendig, da überprüft wird, ob das Programm mit Quiescence Search einen besseren Zug spielt, als ohne. Die Konstante \texttt{QUIESCE\_DEPTH} steht standardmäßig auf $2$ und legt fest, wie tief das Programm in der Ruhesuche weiterhin sucht. Eine solche Begrenzung ist notwendig, da das Programm andernfalls womöglich sehr viele Ebenen tiefer rechnen würde, wenn in mehreren aufeinanderfolgenden Zügen eine Figur geschlagen oder aufgewertet werden kann. In einer ersten Implementierung existierte diese Begrenzung nicht, was einen Rekursions-Fehler zur Folge hatte, da das Programm letztlich zu tief analysiert hatte.
+
+\begin{lstlisting}[caption=Funktion für die Implementierung der Ruhesuche, label=lst:quiesce]
+	def quiesce(board,alpha,beta,value):
+    	if not ENABLE_QUIESCENCE_SEARCH:
+			return value
+		pieces_after_move = get_pieces_sum(board)
+		move = board.pop()
+		pieces_before_move = get_pieces_sum(board)
+		board.push(move)
+		if(pieces_after_move != pieces_before_move):
+			value = minimax(board,QUIESCE_DEPTH,max(value,alpha),beta,True)
+		return value
+\end{lstlisting}
+
+Der Code-Ausschnitt~\ref{lst:quiesce} zeigt nun die komplette Funktion \texttt{quiesce}, welche die Ruhesuche implementiert. Hierfür wird zunächst der bereits evaluierte Wert \texttt{value} zurückgegeben, falls die Quiescence Search deaktiviert ist (erkennbar durch das Flag \texttt{ENABLE\_QUIESCENCE\_SEARCH}). Andernfalls wird zunächst die Summe der Figurenwerte aktuell -- also nach dem letzten evaluierten Zug --, danach die Summe der Figurenwerte vor jenem letzten Zug verglichen. Stimmen diese beiden Werte nicht überein, so besteht hier die beschrieben Notwendigkeit, die Quiescence Search anzuwenden. In diesem Fall wird die Minimax-Funktion mit den folgenden Parametern aufgerufen:
+
+\begin{itemize}
+	\item \texttt{board}: Hier wird der aktuelle Spielzustand \texttt{board} übernommen, der der Funktion \texttt{quiesce} übergeben wurde. Der Spielzustand ist nicht verändert, da der \texttt{move}, welcher zuerst rückgängig gemacht wurde (um die Anzahl/Werte der Figuren zu erfassen), wieder "`gespielt"' wurde
+	\item \texttt{depth}: Hier wird die Konstante \texttt{QUIESCE\_DEPTH}, welche oben erwähnt wurde, übergeben. Es wird somit festgelegt, wie weit die Ruhesuche tiefer sucht, falls ein taktischer Zug der letzte analysierte Zug war
+	\item \texttt{alpha}: Hier wird der größere Wert von \texttt{value} und \texttt{alpha} übergeben
+	\item \texttt{beta}: Hier wird lediglich der Wert der Variable \texttt{beta} übernommen, welcher bei Aufruf der Funktion übergeben wurde
+	\item \texttt{is\_quiesce}: Hier wird der Wert \texttt{True} übergeben. Dadurch wird erreicht, dass, bei der Suchtiefe $0$, nicht erneut die Quiescence-Search-Funktion aufgerufen wird. In einer ersten Implementierung führte dies zu einem Rekursionsfehler
+\end{itemize}
+
+\section{Testen der Programm-Erweiterung}
+Um zu überprüfen, ob die Erweiterung, welche die Quiescence Search implementiert, wie erwartet funktioniert, wurde ein weiterer Test geschrieben. Zu diesem Zweck wurde das Szenario aus Abbildung~\ref{fig:problem} übernommen: Das Programm wurde zunächst normal aufgerufen, sodass die Erweiterung für die Quiescence Search in Kraft tritt. Aus Gründen der Einfachheit, wird die Minimax-Funktion mit einer Tiefe von $1$ aufgerufen. Der Code-Ausschnitt~\ref{lst:testone} zeigt dies.
+
+\begin{lstlisting}[caption=Test für die Quiescence Search (normaler Aufruf), label=lst:testone]
+	%%time
+	CACHE = {} # Has to be cleared for this test to work
+	board,move = perform_move(chess.Board("b3k3/1n5p/6p1/8/8/8/7P/1Q4K1 w - - 0 1"),1, True)
+	assert str(move) != "b1b7"
+\end{lstlisting}
+
+Der Cache -- welcher für die \textit{Memoization} verwendet wird -- muss geleert werden, da das Ergebenis sonst verfälscht werden könnte. Außerdem wird die Funktion \texttt{perform\_move} verwendet, welche jedoch lediglich das mehrfache Schreiben gleicher Anweisungen verhindert. Anschließend wird geprüft, ob es sich bei dem errechneten Zug \textbf{nicht} um den Zug \textit{b1b7}, also die Dame auf B7, wo sie im nächsten Zug geschlagen werden kann, handelt. Abbildung~\ref{fig:testone} zeigt, dass dies der Fall ist und die Ruhesuchenerweiterung somit eingreift und auch den taktischen Zug erkannt hat.
+
+\begin{figure}[H]
+	\includegraphics[width=.90\textwidth]{testone.png}
+	\caption{Korrekte Anwendung der Quiescence Search: Der scheinbar gute Zug wird nicht gewählt, obwohl die Minimax-Tiefe auf $1$ gesetzt ist}
+	\label{fig:testone}
+\end{figure}
+
+Zur Kontrolle des Tests wird der Test erneut aufgerufen, jedoch wird bei dem zweiten Mal das Flag \texttt{ENABLE\_QUIESCENCE\_SEARCH} auf \texttt{False} gesetzt, sodass die Erweiterung der Ruhesuche nicht verwendet wird (Der Code-Ausschnitt~\ref{lst:erweiterung} zeigt dies). Der Code-Ausschnitt~\ref{lst:testtwo} zeigt der Vollständigkeit halber auch den Code für diesen zweiten Test.
+
+\begin{lstlisting}[caption=Test für die Quiescence Search (Aufruf mit deaktivierter Ruhesuche), label=lst:testtwo]
+	%%time
+	ENABLE_QUIESCENCE_SEARCH = False
+	CACHE = {} # Has to be cleared for this test to work
+	board,move = perform_move(chess.Board("b3k3/1n5p/6p1/8/8/8/7P/1Q4K1 w - - 0 1"),1, True)
+	assert str(move) == "b1b7"
+	ENABLE_QUIESCENCE_SEARCH = True
+\end{lstlisting}
+
+Es ist zu sehen, dass der Test nahezu gleich ist, jedoch einen anderen errechneten Zug erwarten, nämlich den scheinbar guten Zug \textit{b1b7}. Abbildung~\ref{fig:testtwo} zeigt, dass das Ergebnis dieses Tests auch das eben erwartete ist: Das Programm denkt, aufgrund der Suchtiefe, dass es den besten Zug gefunden hat; der Horizonteffekt tritt ein.
+
+\begin{figure}[H]
+	\includegraphics[width=.90\textwidth]{testtwo.png}
+	\caption{Kontrolltest: Ohne Quiescence Search wählt das Programm einen schlechten Zug, welchen es allerdings aufgrund des Horizonteffekts nicht als solchen erkennt}
+	\label{fig:testtwo}
+\end{figure}
+
+\section{Performanz-Analyse}
+Letztlich gilt es zu untersuchen, inwiefern die Verbesserung der Zugberechnung Auswirkungen auf die Performanz und Berechnungsdauer des Programms hat. Hierfür wurde eine Performanz-Analyse gemacht, in der die Tests für die Schach-KI mehrfach hintereinander ausg eführt werden. Insgesamt wurden die Tests mehrfach ausgeführt, hierbei jeweils fünfmal für die folgenden Szenarios:
+
+\begin{itemize}
+	\item Suchtiefe $4$, keine Verwendung von Quiescence Search (Szenario \textbf{A})
+	\item Suchtiefe $4$, Verwendung von Quiescence Search mit Tiefe $1$ (Szenario \textbf{B})
+	\item Suchtiefe $4$, Verwendung von Quiescence Search mit Tiefe $2$ (Szenario \textbf{C})
+	\item Suchtiefe $5$, keine Verwendung von Quiescence Search (Szenario \textbf{D})
+	\item Suchtiefe $5$, Verwendung von Quiescence Search mit Tiefe $1$ (Szenario \textbf{E})
+	\item Suchtiefe $5$, Verwendung von Quiescence Search mit Tiefe $2$ (Szenario \textbf{F})
+\end{itemize}
+
+Tabelle~\ref{tab:performance} stellt die Ergebnisse dar. Die Buchstaben in der obersten Reihe korrespondieren dabei zu den oben erwähnten Szenarios. Die Werte in der zweiten Zeile beschreiben die durchschnittliche Dauer, bis alle Tests durchgelaufen sind. Sie lassen keine Rückschlüsse darauf zurück, wie lange die Berechnung eines einzelnen Zuges dauert. Letztlich ist es immer im Ermessen des Spielers, wie lange die Zugberechnung dauern darf, bis das Programm "`unspielbar"' wird.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|l|l|l|}
+		\hline
+		\textbf{A} & \textbf{B} & \textbf{C} & D            & E            & F            \\ \hline
+		Ø 871,05 s & Ø 868,81 s & Ø 872,07 s & Ø 4.423,37 s & Ø 4.464,97 s & Ø 4.645,28 s \\ \hline
+		\end{tabular}
+	\caption{Ergebnisse der Performanz-Analyse: T steht für die Suchtiefe, Q für die Quiescence-Search-Tiefe (Q = 0 bedeutet, dass keine Quiescence Search verwendet wurde)}
+	\label{tab:performance}
+\end{table}
+
+Die Tabelle zeigt, dass die Verwendung der Quiescence Search mit einer Tiefe von $1$ eine unwesentliche Steigerung der Zugberechnungsdauer verursacht. Im Vergleich zu einer normalen Zugberechnung mit einer Suchtiefe von $4$, wird die Gesamtdauer durch die Verwendung der Quiescence Search um durchschnittlich lediglich vier Sekunden erhöht. Ein Vergleich zwischen Szenario \textbf{A} und \textbf{C}, also der Berechnung mit Suchtiefe $4$ und einer Quiescence Search mit Tiefe $1$ und der Berechnung ohne Quiescence Search, dafür jedoch mit einer Suchtiefe von $5$, zeigt außerdem, dass dort ein enormer Performanz-Vorteil herrscht; offensichtlich muss dabei betrachtet werden, dass eine höhere Standard-Suchtiefe auch eine höhere Zugqualität bedeutet. Nichtsdestotrotz zeigt dies, dass die Verwendung einer Ruhesuche in einem Minimax-Algorithmus, durch die bei taktischen Zügen erhöhte Zugtiefe, die Zugqualität verbessert, ohne einen starken Anstieg der Berechnungsdauer zu verursachen, wie es bei der Erhöhung der Suchtiefe unter Umständen der Fall ist. Es sollte außerdem an dieser Stelle angemerkt werden, dass die Quiescence Search bei der Schach-KI nicht mit einer Suchtiefe von $1$, sondern besser mit einer Suchtiefe von $2$ oder $3$ verwendet werden sollte. 

@@ -83,36 +83,6 @@
       \verb http://www.ra.cs.uni-tuebingen.de/lehre/ss02/vs_mh/mh-v1.pdf
       \endverb
     \endentry
-    \entry{nextchessmove}{online}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=e418f92727a7c316a24e4219a92dd8e3}{%
-           family={{Next Chess Move}},
-           familyi={N\bibinitperiod}}}%
-      }
-      \strng{namehash}{e418f92727a7c316a24e4219a92dd8e3}
-      \strng{fullhash}{e418f92727a7c316a24e4219a92dd8e3}
-      \strng{bibnamehash}{e418f92727a7c316a24e4219a92dd8e3}
-      \strng{authorbibnamehash}{e418f92727a7c316a24e4219a92dd8e3}
-      \strng{authornamehash}{e418f92727a7c316a24e4219a92dd8e3}
-      \strng{authorfullhash}{e418f92727a7c316a24e4219a92dd8e3}
-      \field{sortinit}{N}
-      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{url}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{title}{Next Chess Move: The strongest online chess calculator}
-      \field{urlday}{7}
-      \field{urlmonth}{7}
-      \field{urlyear}{2021}
-      \field{urldateera}{ce}
-      \verb{urlraw}
-      \verb https://nextchessmove.com/
-      \endverb
-      \verb{url}
-      \verb https://nextchessmove.com/
-      \endverb
-    \endentry
     \entry{oxford}{online}{}
       \name{author}{1}{}{%
         {{un=0,uniquepart=base,hash=649fac72be6a1d586776c9e19d4b4764}{%

@@ -1,0 +1,210 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.1 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global}
+    \entry{chessprogramming}{online}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=5535eaa72d5eb9b5f2d2bc2821be4f79}{%
+           family={{Chess Programming Wiki}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{5535eaa72d5eb9b5f2d2bc2821be4f79}
+      \strng{fullhash}{5535eaa72d5eb9b5f2d2bc2821be4f79}
+      \strng{bibnamehash}{5535eaa72d5eb9b5f2d2bc2821be4f79}
+      \strng{authorbibnamehash}{5535eaa72d5eb9b5f2d2bc2821be4f79}
+      \strng{authornamehash}{5535eaa72d5eb9b5f2d2bc2821be4f79}
+      \strng{authorfullhash}{5535eaa72d5eb9b5f2d2bc2821be4f79}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{url}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Tactical Moves - Chessprogramming wiki}
+      \field{urlday}{7}
+      \field{urlmonth}{7}
+      \field{urlyear}{2021}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.chessprogramming.org/Tactical_Moves
+      \endverb
+      \verb{url}
+      \verb https://www.chessprogramming.org/Tactical_Moves
+      \endverb
+    \endentry
+    \entry{merz}{online}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=f44c2daa39341638520dca20692148fc}{%
+           family={Merz},
+           familyi={M\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{f44c2daa39341638520dca20692148fc}
+      \strng{fullhash}{f44c2daa39341638520dca20692148fc}
+      \strng{bibnamehash}{f44c2daa39341638520dca20692148fc}
+      \strng{authorbibnamehash}{f44c2daa39341638520dca20692148fc}
+      \strng{authornamehash}{f44c2daa39341638520dca20692148fc}
+      \strng{authorfullhash}{f44c2daa39341638520dca20692148fc}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Moderne heuristische Optimierungsverfahren: Meta-Heuristiken}
+      \field{urlday}{6}
+      \field{urlmonth}{7}
+      \field{urlyear}{2021}
+      \field{year}{2002}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb http://www.ra.cs.uni-tuebingen.de/lehre/ss02/vs_mh/mh-v1.pdf
+      \endverb
+      \verb{url}
+      \verb http://www.ra.cs.uni-tuebingen.de/lehre/ss02/vs_mh/mh-v1.pdf
+      \endverb
+    \endentry
+    \entry{oxford}{online}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=649fac72be6a1d586776c9e19d4b4764}{%
+           family={{Oxford Reference}},
+           familyi={O\bibinitperiod}}}%
+      }
+      \strng{namehash}{649fac72be6a1d586776c9e19d4b4764}
+      \strng{fullhash}{649fac72be6a1d586776c9e19d4b4764}
+      \strng{bibnamehash}{649fac72be6a1d586776c9e19d4b4764}
+      \strng{authorbibnamehash}{649fac72be6a1d586776c9e19d4b4764}
+      \strng{authornamehash}{649fac72be6a1d586776c9e19d4b4764}
+      \strng{authorfullhash}{649fac72be6a1d586776c9e19d4b4764}
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{url}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Horizon effect - Oxford Reference}
+      \field{urlday}{7}
+      \field{urlmonth}{7}
+      \field{urlyear}{2021}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.oxfordreference.com/view/10.1093/oi/authority.20110803095944934
+      \endverb
+      \verb{url}
+      \verb https://www.oxfordreference.com/view/10.1093/oi/authority.20110803095944934
+      \endverb
+    \endentry
+    \entry{shannon}{article}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=536c91678d1dde76c9acd47047556291}{%
+           family={Shannon},
+           familyi={S\bibinitperiod},
+           given={Claude\bibnamedelima E.},
+           giveni={C\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{536c91678d1dde76c9acd47047556291}
+      \strng{fullhash}{536c91678d1dde76c9acd47047556291}
+      \strng{bibnamehash}{536c91678d1dde76c9acd47047556291}
+      \strng{authorbibnamehash}{536c91678d1dde76c9acd47047556291}
+      \strng{authornamehash}{536c91678d1dde76c9acd47047556291}
+      \strng{authorfullhash}{536c91678d1dde76c9acd47047556291}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{year}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Philosophical Magazine}
+      \field{number}{314}
+      \field{title}{XXII. Programming a Computer for Playing Chess}
+      \field{volume}{41}
+      \field{year}{1950}
+    \endentry
+    \entry{pruning}{online}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=9c677286866aad38f8e9b660f5411814}{%
+           family={Wikipedia},
+           familyi={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{fullhash}{9c677286866aad38f8e9b660f5411814}
+      \strng{bibnamehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{authorbibnamehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{authornamehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{authorfullhash}{9c677286866aad38f8e9b660f5411814}
+      \field{extraname}{1}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradate}{1}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{url}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Grafik-Upload Alpha-Beta-Pruning}
+      \field{urlday}{6}
+      \field{urlmonth}{7}
+      \field{urlyear}{2021}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/AB_pruning.svg/1200px-AB_pruning.svg.png
+      \endverb
+      \verb{url}
+      \verb https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/AB_pruning.svg/1200px-AB_pruning.svg.png
+      \endverb
+    \endentry
+    \entry{minimax}{online}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=9c677286866aad38f8e9b660f5411814}{%
+           family={Wikipedia},
+           familyi={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{fullhash}{9c677286866aad38f8e9b660f5411814}
+      \strng{bibnamehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{authorbibnamehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{authornamehash}{9c677286866aad38f8e9b660f5411814}
+      \strng{authorfullhash}{9c677286866aad38f8e9b660f5411814}
+      \field{extraname}{2}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradate}{2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{url}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Grafik-Upload Minimax-Algorithmus}
+      \field{urlday}{6}
+      \field{urlmonth}{7}
+      \field{urlyear}{2021}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Minimax.svg/400px-Minimax.svg.png
+      \endverb
+      \verb{url}
+      \verb https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Minimax.svg/400px-Minimax.svg.png
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

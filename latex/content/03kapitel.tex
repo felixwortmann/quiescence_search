@@ -100,7 +100,6 @@ Zur Kontrolle des Tests wird der Test erneut aufgerufen, jedoch wird bei dem zwe
 \begin{lstlisting}[caption=Test für die Quiescence Search (Aufruf mit deaktivierter Ruhesuche), label=lst:testtwo]
 	%%time
 	ENABLE_QUIESCENCE_SEARCH = False
-	CACHE = {} # Has to be cleared for this test to work
 	board,move = perform_move(chess.Board("b3k3/1n5p/6p1/8/8/8/7P/1Q4K1 w - - 0 1"),1, True)
 	assert str(move) == "b1b7"
 	ENABLE_QUIESCENCE_SEARCH = True
